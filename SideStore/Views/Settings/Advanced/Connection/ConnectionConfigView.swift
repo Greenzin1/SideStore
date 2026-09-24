@@ -68,12 +68,52 @@ struct ConnectionConfigView: View {
     @State private var showConfirmDialog = false
     @State private var validationError: String?
     @State private var showValidationErrorAlert = false
+    @State private var localNetStatus: String = "Unknown"
+    @State private var localNetChecking = false
+
+    private var localNetStatusColor: Color {
+        switch localNetStatus {
+        case "Granted": return .green
+        case "Denied": return .red
+        default: return .gray
+        }
+    }
+
+    private func askLocalNetworkAccess() {
+        guard !localNetChecking else { return }
+        localNetChecking = true
+        Task {
+            let granted = await LocalNetworkPermissionChecker.shared.checkPermission()
+            localNetStatus = granted ? "Granted" : "Denied"
+            localNetChecking = false
+        }
+    }
 
     var body: some View {
         ZStack {
             List {
                 Section {
                     Toggle("Use Local VPN", isOn: $draftUseLocalVPN)
+                }
+
+                Section {
+                    HStack {
+                        Text("Permission")
+                        Spacer()
+                        if localNetChecking {
+                            ProgressView()
+                        } else {
+                            Text(localNetStatus)
+                                .foregroundColor(localNetStatusColor)
+                        }
+                    }
+                    Button("Ask for Local Network Access") {
+                        askLocalNetworkAccess()
+                    }
+                } header: {
+                    Text("Local Network Permission")
+                } footer: {
+                    Text("If SideStore was installed with a pairing key and setup was skipped, iOS may never have shown the Local Network prompt and will silently block connections to the VPN tunnel. Tap to trigger the system prompt, allow it, then tap Confirm.")
                 }
 
                 if draftUseLocalVPN {
@@ -196,6 +236,9 @@ struct ConnectionConfigView: View {
                 draftWireGuardServerPort = String(config.wireguardServerPort)
                 alwaysShowWireGuardConfig = UserDefaults.standard.alwaysShowWireGuardConfig
                 acceptIPv6ConnectionConfig = UserDefaults.standard.acceptIPv6ConnectionConfig
+                if localNetStatus == "Unknown" {
+                    askLocalNetworkAccess()
+                }
             }
             .alert("Invalid Configuration", isPresented: $showValidationErrorAlert) {
                 SwiftUI.Button("OK", role: .cancel) {}
