@@ -1,20 +1,37 @@
 # SideStore
 
-> SideStore is an *untethered, community driven* alternative app store for non-jailbroken iOS devices 
+> SideStore is an *untethered, community driven* alternative app store for non-jailbroken iOS devices
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
-[![Nightly SideStore build](https://github.com/SideStore/SideStore/actions/workflows/nightly.yml/badge.svg)](https://github.com/SideStore/SideStore/actions/workflows/nightly.yml)
-[![.github/workflows/beta.yml](https://github.com/SideStore/SideStore/actions/workflows/beta.yml/badge.svg)](https://github.com/SideStore/SideStore/actions/workflows/beta.yml)
-[![Discord](https://img.shields.io/discord/949183273383395328?label=Discord)](https://dis.sidestore.io)
+[![Alpha SideStore build](https://github.com/Greenzin1/SideStore/actions/workflows/alpha.yml/badge.svg)](https://github.com/Greenzin1/SideStore/actions/workflows/alpha.yml)
+[![Stable SideStore build](https://github.com/Greenzin1/SideStore/actions/workflows/stable.yml/badge.svg)](https://github.com/Greenzin1/SideStore/actions/workflows/stable.yml)
+[![Release](https://img.shields.io/github/v/release/Greenzin1/SideStore?label=Alpha)](https://github.com/Greenzin1/SideStore/releases)
 
-![Alt](https://repobeats.axiom.co/api/embed/3a329ce95955690b9a9366f8d5598626a847d96c.svg "Repobeats analytics image")
+Fork de [SideStore/SideStore](https://github.com/SideStore/SideStore) mantido por [Greenzin1](https://github.com/Greenzin1), com correções para o [issue #1466](https://github.com/SideStore/SideStore/issues/1466) — *Device Reachability Error / DeviceEndpointNotInitialized no iOS 16*.
 
 SideStore is an iOS application that allows you to sideload apps onto your iOS device with just your Apple ID. SideStore resigns apps with your personal development certificate, and then uses a [specially designed VPN](https://github.com/jkcoxson/em_proxy) in order to trick iOS into installing them. SideStore will periodically "refresh" your apps in the background, to keep their normal 7-day development period from expiring.
 
-SideStore's goal is to provide an untethered sideloading experience. It's a community driven fork of [AltStore](https://github.com/rileytestut/AltStore), and has already implemented some of the community's most-requested features.
+## Fork changes
 
-(Contributions are welcome! 🙂)
+Correções em cima da tag `0.7.0-alpha`:
+
+- **Fix do `DeviceEndpointNotInitialized` (iOS 16)** — [SideStore#1466](https://github.com/SideStore/SideStore/issues/1466):
+  - `isReady()` refaz a descoberta de endpoint enquanto ele não inicializar (com retry);
+  - `refreshEndpoint()` não descarta mais a descoberta quando `ifacesChanged` é falso mas o endpoint ainda não está pronto;
+  - túnel do LocalDevVPN é mantido mesmo quando o probe TCP falha (antes retornava `nil`);
+  - filtro de interfaces relaxado: aceita qualquer `utun` com IPv4 quando não há IPv4 estrito;
+  - probe TCP com retry (750ms) em vez de um único tiro;
+  - candidatos de fallback `10.7.0.1` / `10.7.0.2`.
+- **Botão "Ask for Local Network Access" na Connection Config** — se o setup foi pulado (pairing key já presente), o iOS nunca mostra o prompt de Rede Local e bloqueia silenciosamente as conexões com o túnel; o botão força o prompt e mostra o status (Granted/Denied).
+- Submodule `minimuxer` aponta para o fork [Greenzin1/minimuxer](https://github.com/Greenzin1/minimuxer) com as correções acima.
+
+## Installation
+
+1. Baixe o IPA em [Releases → Alpha](https://github.com/Greenzin1/SideStore/releases/tag/alpha).
+2. Instale com o instalador de sua escolha (iLoader, SideStore antigo, etc.).
+3. LocalDevVPN: **Tunnel IP** `10.7.0.2/30`, **Device IP** `10.7.0.1/32` → reconectar.
+4. No SideStore: Settings → Advanced → Connection Config → permita a Rede Local → **Confirm**.
 
 ## Requirements
 - Xcode 15
@@ -22,6 +39,7 @@ SideStore's goal is to provide an untethered sideloading experience. It's a comm
 - Rustup (`brew install rustup`)
 
 Why iOS 14? Targeting such a recent version of iOS allows us to accelerate development, especially since not many developers have older devices to test on. This is corrobated by the fact that SwiftUI support is much better, allowing us to transistion to a more modern UI codebase.
+
 ## Project Overview
 
 ### SideStore
