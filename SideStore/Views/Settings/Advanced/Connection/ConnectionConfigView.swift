@@ -107,7 +107,7 @@ struct ConnectionConfigView: View {
                                 .foregroundColor(localNetStatusColor)
                         }
                     }
-                    Button("Ask for Local Network Access") {
+                    SButton("Ask for Local Network Access") {
                         askLocalNetworkAccess()
                     }
                 } header: {
