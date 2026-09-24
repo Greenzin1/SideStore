@@ -2,7 +2,7 @@
 
 [submodule "Dependencies/minimuxer"]
     path = Dependencies/minimuxer
-    url = https://github.com/SideStore/minimuxer
+    url = https://github.com/Greenzin1/minimuxer
     branch = develop
 [submodule "Dependencies/SideSign"]
 	path = Dependencies/SideSign
